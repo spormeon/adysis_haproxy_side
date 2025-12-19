@@ -3,20 +3,24 @@ set -eu
 
 : "${SECRET_HEADER_NAME:?must be set}"
 : "${SECRET_HEADER_VALUE:?must be set}"
-: "${READY_PROBE_HOST:?must be set (e.g. pbs-europe-1.adysis.com)}"
+: "${REGION_PREFIX:?must be set (e.g. pbs-europe, pbs-northamerica, pbs-southamerica)}"
+
+# Derive probe host from region prefix (slot 1) unless explicitly overridden
+READY_PROBE_HOST="${READY_PROBE_HOST:-${REGION_PREFIX}-1.adysis.com}"
+
+export SECRET_HEADER_NAME SECRET_HEADER_VALUE READY_PROBE_HOST REGION_PREFIX
 
 # 1) Health listener for Bunny checks
-export SECRET_HEADER_NAME SECRET_HEADER_VALUE READY_PROBE_HOST
 envsubst '${SECRET_HEADER_NAME} ${SECRET_HEADER_VALUE} ${READY_PROBE_HOST}' \
   < /etc/nginx/health.conf.template > /etc/nginx/conf.d/00-health.conf
 
-# 2) Egress listener blocks (18001..18010)
+# 2) Egress listener blocks
 OUT="/etc/nginx/conf.d/egress.conf"
 : > "$OUT"
 
 gen_region () {
-  region_prefix="$1"   # e.g. "pbs-northamerica" or whatever your real name is
-  base_port="$2"       # e.g. 15000
+  region_prefix="$1"
+  base_port="$2"
 
   i=1
   while [ $i -le 10 ]; do
@@ -31,14 +35,9 @@ gen_region () {
   done
 }
 
-# EU 18001..18010
 gen_region "pbs-europe"       18000
-
-# NA 15001..15010
 gen_region "pbs-northamerica" 15000
-
-# SA 16001..16010
 gen_region "pbs-southamerica" 16000
 
-
 exec nginx -g "daemon off;"
+
