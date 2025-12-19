@@ -5,25 +5,7 @@ server {
 
   location = /healthz { return 200 "ok\n"; }
   location = /livez   { return 200 "ok\n"; }
-
-  # Readiness: prove we can reach Bunny origin using correct Host + secret header
-  location = /readyz {
-    set $probe "${READY_PROBE_HOST}";
-    proxy_pass http://$probe/status;
-
-    proxy_set_header Host $probe;
-    proxy_set_header ${SECRET_HEADER_NAME} "${SECRET_HEADER_VALUE}";
-
-    proxy_http_version 1.1;
-    proxy_set_header Connection "";
-
-    proxy_connect_timeout 3s;
-    proxy_send_timeout 3s;
-    proxy_read_timeout 3s;
-
-    proxy_intercept_errors on;
-    error_page 500 502 503 504 = @notready;
-  }
+  location = /readyz { return 200 "ready\n"; }
 
   location @notready {
     return 503 "not-ready\n";
