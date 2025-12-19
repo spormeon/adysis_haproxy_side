@@ -14,16 +14,31 @@ envsubst '${SECRET_HEADER_NAME} ${SECRET_HEADER_VALUE} ${READY_PROBE_HOST}' \
 OUT="/etc/nginx/conf.d/egress.conf"
 : > "$OUT"
 
-i=1
-while [ $i -le 10 ]; do
-  export PORT=$((18000 + i))
-  export SLOT_HOST="pbs-europe-${i}.adysis.com"
+gen_region () {
+  region_prefix="$1"   # e.g. "pbs-northamerica" or whatever your real name is
+  base_port="$2"       # e.g. 15000
 
-  envsubst '${PORT} ${SLOT_HOST} ${SECRET_HEADER_NAME} ${SECRET_HEADER_VALUE}' \
-    < /etc/nginx/nginx.conf.template >> "$OUT"
-  printf "\n" >> "$OUT"
+  i=1
+  while [ $i -le 10 ]; do
+    export PORT=$((base_port + i))
+    export SLOT_HOST="${region_prefix}-${i}.adysis.com"
 
-  i=$((i + 1))
-done
+    envsubst '${PORT} ${SLOT_HOST} ${SECRET_HEADER_NAME} ${SECRET_HEADER_VALUE}' \
+      < /etc/nginx/nginx.conf.template >> "$OUT"
+    printf "\n" >> "$OUT"
+
+    i=$((i + 1))
+  done
+}
+
+# EU 18001..18010
+gen_region "pbs-europe"       18000
+
+# NA 15001..15010
+gen_region "pbs-northamerica" 15000
+
+# SA 16001..16010
+gen_region "pbs-southamerica" 16000
+
 
 exec nginx -g "daemon off;"
