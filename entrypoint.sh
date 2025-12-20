@@ -30,9 +30,13 @@ gen_region () {
   done
 }
 
-gen_region "pbs-europe"       18000
 gen_region "pbs-northamerica" 16000
 gen_region "pbs-southamerica" 17000
+gen_region "pbs-europe"       18000
+gen_region "pbs-africa"       19000
+gen_region "pbs-middleeast"   20000
+gen_region "pbs-asia"         21000
+gen_region "pbs-oceania"      22000
 
 nginx -t
 exec nginx -g "daemon off;"
