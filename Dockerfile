@@ -1,4 +1,4 @@
-FROM nginx:1.29-alpine
+FROM nginx:1.29.4-alpine
 
 RUN apk add --no-cache curl gettext \
   && rm -f /etc/nginx/conf.d/default.conf
