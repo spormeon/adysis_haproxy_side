@@ -1,14 +1,3 @@
-# #!/bin/sh
-# set -eu
-
-# : "${SECRET_HEADER_NAME:?must be set}"
-# : "${SECRET_HEADER_VALUE:?must be set}"
-
-# export SECRET_HEADER_NAME SECRET_HEADER_VALUE
-
-# # 1) Health listener for Bunny checks
-# cp /etc/nginx/health.conf.template /etc/nginx/conf.d/00-health.conf
-
 #!/bin/sh
 set -eu
 
