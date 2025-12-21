@@ -1,13 +1,31 @@
+# #!/bin/sh
+# set -eu
+
+# : "${SECRET_HEADER_NAME:?must be set}"
+# : "${SECRET_HEADER_VALUE:?must be set}"
+
+# export SECRET_HEADER_NAME SECRET_HEADER_VALUE
+
+# # 1) Health listener for Bunny checks
+# cp /etc/nginx/health.conf.template /etc/nginx/conf.d/00-health.conf
+
 #!/bin/sh
 set -eu
 
-: "${SECRET_HEADER_NAME:?must be set}"
-: "${SECRET_HEADER_VALUE:?must be set}"
+# Health listener should not depend on secrets
+cp /etc/nginx/health.conf.template /etc/nginx/conf.d/00-health.conf
+
+# If secrets aren't set, still start nginx so health works (and egress blocks just won't include header)
+if [ -z "${SECRET_HEADER_NAME:-}" ] || [ -z "${SECRET_HEADER_VALUE:-}" ]; then
+  echo "WARN: SECRET_HEADER_NAME/VALUE not set; starting with health only" >&2
+  nginx -t
+  exec nginx -g "daemon off;"
+fi
 
 export SECRET_HEADER_NAME SECRET_HEADER_VALUE
 
-# 1) Health listener for Bunny checks
-cp /etc/nginx/health.conf.template /etc/nginx/conf.d/00-health.conf
+# ... generate egress.conf as you already do ...
+
 
 # 2) Egress listener blocks
 OUT="/etc/nginx/conf.d/egress.conf"
