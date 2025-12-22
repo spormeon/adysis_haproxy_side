@@ -17,6 +17,7 @@ server {
   location = /status {
 
     access_log off;
+    error_log off;
 
     # This is the slot hostname for THIS port, e.g. pbs-europe-7.adysis.com
     set $upstream "${SLOT_HOST}";
@@ -45,6 +46,7 @@ server {
 
   location @down {
     access_log off;
+    error_log off;
     return 503 "down\n";
   }
 
