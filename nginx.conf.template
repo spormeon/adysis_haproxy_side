@@ -4,6 +4,15 @@ server {
   allow 127.0.0.1;
   deny all;
 
+  access_log off;
+  error_log /dev/stderr warn;
+
+  # log only non-2xx/3xx responses
+  access_log /dev/stdout main if=$log_bad;
+
+  set $log_bad 0;
+  if ($status !~ "^[23]") { set $log_bad 1; }
+
   # Local-only endpoint for HAProxy health checks
   location = /status {
     # This is the slot hostname for THIS port, e.g. pbs-europe-7.adysis.com
